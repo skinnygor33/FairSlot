@@ -14,8 +14,15 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 
+import it.unipi.dsmt.fairslot.web.backend.JInterfaceBackend;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Clock;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -72,8 +79,38 @@ public class AppBootstrap implements ServletContextListener {
         switch (kind) {
             case "mock":
                 return new MockBackend(catalog.all().stream().map(Resource::id).toList(), Clock.systemUTC());
+            case "jinterface":
+                return createJInterfaceBackend();
             default:
                 throw new IllegalStateException("Unknown FAIRSLOT_BACKEND: " + kind);
+        }
+    }
+
+    /**
+     * {@code FAIRSLOT_ERLANG_NODES} (comma-separated, default {@code fairslot_a@<this host>}),
+     * {@code FAIRSLOT_COOKIE} (default {@code fairslot-dev}), {@code FAIRSLOT_WEB_NODE}
+     * (default {@code fairslot_web}), {@code FAIRSLOT_ERLANG_TIMEOUT_MS} (default 5000).
+     */
+    private static BookingBackend createJInterfaceBackend() {
+        List<String> nodes = Arrays.stream(Config.get("FAIRSLOT_ERLANG_NODES", "fairslot_a@" + shortHostName())
+                .split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
+        try {
+            return new JInterfaceBackend(Config.get("FAIRSLOT_WEB_NODE", "fairslot_web"),
+                    Config.get("FAIRSLOT_COOKIE", "fairslot-dev"), nodes,
+                    Long.parseLong(Config.get("FAIRSLOT_ERLANG_TIMEOUT_MS", "5000")));
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot start the JInterface node", e);
+        }
+    }
+
+    /** Same host part that {@code erl -sname} uses. */
+    static String shortHostName() {
+        try {
+            String host = InetAddress.getLocalHost().getHostName();
+            int dot = host.indexOf('.');
+            return dot > 0 ? host.substring(0, dot) : host;
+        } catch (UnknownHostException e) {
+            return "localhost";
         }
     }
 }

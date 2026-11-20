@@ -66,7 +66,7 @@ resends once with the same `ReqId`. A second timeout returns HTTP 503 to the bro
 | `{join_waitlist, ResId, SlotStart}` | resource owner | `#{position}` | `slot_free`, `already_waiting`, `not_found` |
 | `{accept_offer, OfferId}` | resource owner | `#{booking_id}` | `offer_expired`, `quota_exceeded`, `not_found` |
 | `{decline_offer, OfferId}` | resource owner | `#{}` | `not_found` |
-| `{quota}` | quota-shard owner of `UserId` | `#{used_hours, limit_hours, week_start}` | — |
+| `{quota}` | coordinator (its gateway forwards to the user's quota shard) | `#{used_hours, limit_hours, week_start}` | — |
 | `{book_bundle, [{ResId, SlotStart}]}` | coordinator | `#{bundle_id, booking_ids => [binary()]}` | `{slot_taken, ResId}`, `quota_exceeded` |
 | `{partition_map}` | any node | see §4 | — |
 

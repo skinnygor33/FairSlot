@@ -15,7 +15,7 @@ bookings, with primary-backup replication and failover.
 | `backend/` | Erlang back-end (rebar3 app) | Macarena |
 | `web/` | Java web tier: servlets, REST API, WebSocket, UI, SQL (Maven WAR) | Roger |
 | `docs/` | Spec, [message contract](docs/message-contract.md), design decisions | shared |
-| `tools/` | Developer utilities (JInterface installer, ...) | shared |
+| `tools/` | JInterface installer, throwaway Erlang stub for web-tier development | shared |
 
 The only coupling between `web/` and `backend/` is
 [`docs/message-contract.md`](docs/message-contract.md). Change it together.
@@ -41,6 +41,15 @@ cd web
 The dev server uses an in-memory H2 database and the mock back-end. Log in as `alice`,
 `bob`, `carol`, `dave` or `student01`..`student50`, password `fairslot`.
 
+To go through a real Erlang node instead (see [ADR 0001](docs/decisions/0001-jinterface-vs-rest.md)):
+
+```sh
+tools/stub-backend/run.sh                                 # terminal 1: Erlang node fairslot_a
+cd web && FAIRSLOT_BACKEND=jinterface ./mvnw jetty:run    # terminal 2
+```
+
+`./mvnw verify` also runs a JInterface test against a real Erlang node when `erl` is on the PATH.
+
 Web-tier settings (environment variables or `-D` system properties):
 
 | Variable | Default | Meaning |
@@ -50,6 +59,10 @@ Web-tier settings (environment variables or `-D` system properties):
 | `FAIRSLOT_DB_USER` / `FAIRSLOT_DB_PASSWORD` | `sa` / empty | database credentials |
 | `FAIRSLOT_DB_SEED_USERS` | `true` on H2 | create the demo accounts if the users table is empty |
 | `FAIRSLOT_TIMEZONE` | `Europe/Rome` | zone used to turn dates into slot times |
+| `FAIRSLOT_ERLANG_NODES` | `fairslot_a@<this host>` | comma-separated back-end nodes to ask for the partition map |
+| `FAIRSLOT_COOKIE` | `fairslot-dev` | Erlang cookie (set a secret one on the VMs) |
+| `FAIRSLOT_WEB_NODE` | `fairslot_web` | node name of the web tier |
+| `FAIRSLOT_ERLANG_TIMEOUT_MS` | `5000` | wait for a reply before refreshing the map and resending once |
 
 ```sh
 cd backend
