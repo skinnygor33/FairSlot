@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FairSlot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>FairSlot</h1>
+    <div id="who" hidden>
+        <span id="user-name"></span> · <span id="quota"></span>
+        <button id="logout" type="button">Log out</button>
+    </div>
+</header>
+
+<main>
+    <section id="login-view" hidden>
+        <h2>Log in</h2>
+        <form id="login-form">
+            <label>Username <input name="username" autocomplete="username" required></label>
+            <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+            <button type="submit">Log in</button>
+        </form>
+    </section>
+
+    <section id="book-view" hidden>
+        <div class="controls">
+            <label>Resource <select id="resource"></select></label>
+            <label>Date <input id="date" type="date"></label>
+        </div>
+        <div id="slots" class="slots"></div>
+        <h2>My holds and bookings (this session)</h2>
+        <ul id="mine"></ul>
+    </section>
+
+    <p id="message" role="status"></p>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

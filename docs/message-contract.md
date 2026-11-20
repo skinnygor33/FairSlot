@@ -63,7 +63,7 @@ resends once with the same `ReqId`. A second timeout returns HTTP 503 to the bro
 | `{confirm, HoldId}` | resource owner | `#{booking_id}` | `hold_expired`, `not_holder`, `not_found` |
 | `{cancel, BookingId}` | resource owner | `#{}` | `not_holder`, `not_found` |
 | `{check_in, BookingId}` | resource owner | `#{}` | `too_early`, `too_late`, `not_holder`, `not_found` |
-| `{join_waitlist, ResId, SlotStart}` | resource owner | `#{position}` | `already_waiting`, `not_found` |
+| `{join_waitlist, ResId, SlotStart}` | resource owner | `#{position}` | `slot_free`, `already_waiting`, `not_found` |
 | `{accept_offer, OfferId}` | resource owner | `#{booking_id}` | `offer_expired`, `quota_exceeded`, `not_found` |
 | `{decline_offer, OfferId}` | resource owner | `#{}` | `not_found` |
 | `{quota}` | quota-shard owner of `UserId` | `#{used_hours, limit_hours, week_start}` | — |
@@ -77,6 +77,7 @@ Errors that any op may return:
 | `{wrong_owner, CurrentEpoch}` | this node does not own the resource (any more) | refresh map, resend same `ReqId` |
 | `stale_epoch` | request routed with an older epoch | refresh map, resend same `ReqId` |
 | `no_majority` | node is in a minority partition and stopped serving | try another node |
+| `{bad_request, Text}` | malformed op (e.g. slot not on the hour) | HTTP 400 |
 
 Quota handling stays **inside** the back-end: on `hold` the resource owner reserves the
 hours on the user's quota shard first (proposal §4). The web tier never talks to the
