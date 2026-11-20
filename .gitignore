@@ -1,0 +1,27 @@
+# Java / Maven
+web/target/
+*.class
+*.war
+
+# Erlang
+backend/_build/
+backend/rebar3.crashdump
+*.beam
+erl_crash.dump
+
+# Local dev data (H2 database files, logs)
+*.mv.db
+*.trace.db
+*.log
+
+# IDEs and OS
+.idea/
+*.iml
+.vscode/
+nbproject/
+nb-configuration.xml
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/settings.local.json

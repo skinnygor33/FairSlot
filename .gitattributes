@@ -1,0 +1,7 @@
+# Normalise line endings so Windows and Linux/macOS checkouts produce clean diffs.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.jar binary
+*.png binary
+*.pdf binary

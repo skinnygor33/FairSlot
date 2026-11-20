@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>it.unipi.dsmt</groupId>
+    <artifactId>fairslot-web</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <name>FairSlot web tier</name>
+    <description>Servlets, REST API and WebSocket push in front of the FairSlot Erlang back-end.</description>
+
+    <properties>
+        <!-- Java 17: oldest LTS we expect on the cloud VMs; builds fine on newer JDKs. -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <servlet.version>6.0.0</servlet.version>        <!-- Tomcat 10.1+ -->
+        <websocket.version>2.1.1</websocket.version>
+        <jinterface.version>1.16</jinterface.version>   <!-- OTP 29; see tools/install-jinterface.sh -->
+        <gson.version>2.13.2</gson.version>
+        <mysql.version>9.7.0</mysql.version>
+        <h2.version>2.4.240</h2.version>
+        <junit.version>6.1.3</junit.version>
+        <jetty.version>12.1.15</jetty.version>
+    </properties>
+
+    <dependencies>
+        <!-- Provided by the servlet container (Tomcat). -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-api</artifactId>
+            <version>${websocket.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Java <-> Erlang bridge. Not on Maven Central for OTP 29: run tools/install-jinterface.sh once. -->
+        <dependency>
+            <groupId>org.erlang.otp</groupId>
+            <artifactId>jinterface</artifactId>
+            <version>${jinterface.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+
+        <!-- MySQL on the VMs, embedded H2 for local development and tests. -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>fairslot</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.6</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+            </plugin>
+            <!-- Local development server:  ./mvnw jetty:run  ->  http://localhost:8080/ -->
+            <plugin>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/</contextPath>
+                    </webApp>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
