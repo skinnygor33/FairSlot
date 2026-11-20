@@ -38,6 +38,19 @@ cd web
 ./mvnw jetty:run       # dev server on http://localhost:8080/
 ```
 
+The dev server uses an in-memory H2 database and the mock back-end. Log in as `alice`,
+`bob`, `carol`, `dave` or `student01`..`student50`, password `fairslot`.
+
+Web-tier settings (environment variables or `-D` system properties):
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `FAIRSLOT_BACKEND` | `mock` | `mock` (in memory) or `jinterface` (real Erlang cluster) |
+| `FAIRSLOT_DB_URL` | in-memory H2 | e.g. `jdbc:mysql://localhost:3306/fairslot` on the VM |
+| `FAIRSLOT_DB_USER` / `FAIRSLOT_DB_PASSWORD` | `sa` / empty | database credentials |
+| `FAIRSLOT_DB_SEED_USERS` | `true` on H2 | create the demo accounts if the users table is empty |
+| `FAIRSLOT_TIMEZONE` | `Europe/Rome` | zone used to turn dates into slot times |
+
 ```sh
 cd backend
 rebar3 compile && rebar3 eunit
