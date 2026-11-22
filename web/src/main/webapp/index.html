@@ -10,7 +10,12 @@
 <header>
     <h1>FairSlot</h1>
     <div id="who" hidden>
-        <span id="user-name"></span> · <span id="quota"></span>
+        <span id="live" class="live off" title="Live updates">live</span>
+        <span id="user-name"></span>
+        <span class="quota" title="Hours booked this week">
+            <span class="quota-bar"><span id="quota-fill"></span></span>
+            <span id="quota-text"></span>
+        </span>
         <button id="logout" type="button">Log out</button>
     </div>
 </header>
@@ -21,21 +26,38 @@
         <form id="login-form">
             <label>Username <input name="username" autocomplete="username" required></label>
             <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
-            <button type="submit">Log in</button>
+            <button type="submit" class="primary">Log in</button>
         </form>
     </section>
 
     <section id="book-view" hidden>
+        <div id="offers" aria-live="polite"></div>
+
         <div class="controls">
             <label>Resource <select id="resource"></select></label>
             <label>Date <input id="date" type="date"></label>
         </div>
+        <p class="legend">
+            <span class="dot free"></span>free
+            <span class="dot taken"></span>taken (click to join the waitlist)
+            <span class="dot mine"></span>yours
+        </p>
         <div id="slots" class="slots"></div>
-        <h2>My holds and bookings (this session)</h2>
-        <ul id="mine"></ul>
+
+        <details id="bundle">
+            <summary>Group booking: a room and equipment together</summary>
+            <p class="hint">Both are booked, or neither is.</p>
+            <form id="bundle-form">
+                <label>Room <select name="room"></select></label>
+                <label>Equipment <select name="equipment"></select></label>
+                <label>Date <input name="date" type="date" required></label>
+                <label>Hour <select name="hour"></select></label>
+                <button type="submit" class="primary">Book both</button>
+            </form>
+        </details>
     </section>
 
-    <p id="message" role="status"></p>
+    <ul id="log" aria-live="polite"></ul>
 </main>
 
 <script src="app.js"></script>

@@ -5,7 +5,9 @@
 > against this file.
 >
 > - v0.1 (20 Nov): first draft.
-> - v0.2 (23 Nov): event `slot_taken`, so open calendars update when someone else takes a slot.
+> - v0.2 (23 Nov): event `slot_taken`, so open calendars update when someone else takes a slot;
+>   `availability` returns the IDs of the caller's own holds, bookings and offers, so the UI
+>   recovers them after a page reload.
 
 The web tier (Java) joins the Erlang cluster as a **hidden node** through JInterface
 and exchanges plain Erlang terms with the back-end. Inter-node messages between Erlang
@@ -60,7 +62,7 @@ resends once with the same `ReqId`. A second timeout returns HTTP 503 to the bro
 
 | Op | Sent to | `{ok, Map}` contents | Possible `{error, Reason}` |
 |---|---|---|---|
-| `{availability, ResId, DayStart}` | resource owner | `#{slots => [#{start, state}]}`, `state` ∈ `free \| held \| booked \| mine` | `not_found` |
+| `{availability, ResId, DayStart}` | resource owner | `#{slots => [#{start, state}]}`, `state` ∈ `free \| held \| booked \| mine`; `mine` slots also carry `hold_id` + `expires_at`, `booking_id` or `offer_id` + `expires_at` | `not_found` |
 | `{hold, ResId, SlotStart}` | resource owner | `#{hold_id, expires_at}` | `slot_taken`, `quota_exceeded`, `not_found` |
 | `{release, HoldId}` | resource owner | `#{}` | `not_found` |
 | `{confirm, HoldId}` | resource owner | `#{booking_id}` | `hold_expired`, `not_holder`, `not_found` |

@@ -204,6 +204,17 @@ public class MockBackend implements BookingBackend {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("start", start);
             m.put("state", state);
+            if (state.equals("mine")) {
+                if (s.holdId != null) {
+                    m.put("hold_id", s.holdId);
+                    m.put("expires_at", s.holdExpires);
+                } else if (s.bookingId != null) {
+                    m.put("booking_id", s.bookingId);
+                } else {
+                    m.put("offer_id", s.offerId);
+                    m.put("expires_at", s.offerExpires);
+                }
+            }
             list.add(m);
         }
         return Map.of("slots", list);

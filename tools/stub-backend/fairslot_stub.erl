@@ -71,7 +71,7 @@ handle(_User, {debug_nodes}, S) ->
     {{ok, #{self => node(), visible => nodes(visible), hidden => nodes(hidden)}}, S};
 
 handle(User, {availability, ResId, DayStart}, S = #{slots := Slots}) ->
-    List = [#{start => T, state => state_for(User, maps:get({ResId, T}, Slots, free))}
+    List = [slot_info(User, T, maps:get({ResId, T}, Slots, free))
             || H <- lists:seq(?FIRST_HOUR, ?LAST_HOUR - 1), T <- [DayStart + H * ?HOUR]],
     {{ok, #{slots => List}}, S};
 
@@ -152,6 +152,11 @@ free_slot(Key = {ResId, Start}, User, S = #{slots := Slots, quota := Quota}) ->
 %% Events go to the mailbox registered as 'events' on the web node (contract §5).
 push(_Type, _Data, #{web := undefined}) -> ok;
 push(Type, Data, #{web := WebNode}) -> {events, WebNode} ! {fs_event, Type, Data}, ok.
+
+%% The caller's own slots carry their IDs so the UI can act on them after a reload.
+slot_info(User, T, {held, User, HoldId}) -> #{start => T, state => mine, hold_id => HoldId};
+slot_info(User, T, {booked, User, BookingId}) -> #{start => T, state => mine, booking_id => BookingId};
+slot_info(User, T, Slot) -> #{start => T, state => state_for(User, Slot)}.
 
 state_for(_User, free) -> free;
 state_for(User, {_, User, _}) -> mine;
