@@ -37,6 +37,7 @@ public class AuthServlet extends ApiServlet {
         } else if (path.equals(List.of("logout"))) {
             HttpSession session = req.getSession(false);
             if (session != null) {
+                app().hub().forgetHttpSession(session.getId());   // stop pushing to this session's tabs
                 session.invalidate();
             }
             writeJson(resp, 200, Map.of());

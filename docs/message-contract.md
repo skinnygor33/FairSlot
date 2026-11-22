@@ -1,8 +1,11 @@
 # Message contract: web tier ↔ Erlang back-end
 
-> **Status: DRAFT v0.1** — proposed by Roger on 20 Nov 2026, to be reviewed by Macarena
-> before the week 1 gate (Sun 22 Nov). Change it freely, but bump the version and tell
-> the other person: both sides code against this file.
+> **Status: DRAFT v0.2** — proposed by Roger, to be reviewed by Macarena.
+> Change it freely, but bump the version and tell the other person: both sides code
+> against this file.
+>
+> - v0.1 (20 Nov): first draft.
+> - v0.2 (23 Nov): event `slot_taken`, so open calendars update when someone else takes a slot.
 
 The web tier (Java) joins the Erlang cluster as a **hidden node** through JInterface
 and exchanges plain Erlang terms with the back-end. Inter-node messages between Erlang
@@ -111,6 +114,7 @@ WebSocket to the affected user's browsers.
 | `hold_expired` | `#{user, hold_id}` | hold released |
 | `checkin_missed` | `#{user, booking_id}` | no check-in 15 min after start; slot released |
 | `slot_freed` | `#{resource_id, slot_start}` | any slot becomes free (refreshes open calendars) |
+| `slot_taken` | `#{resource_id, slot_start}` | a free slot is held or booked (refreshes open calendars) — *added in v0.2* |
 | `partition_moved` | `#{epoch, partition, node}` | failover; web tier refreshes its map |
 
 ## 6. Open questions

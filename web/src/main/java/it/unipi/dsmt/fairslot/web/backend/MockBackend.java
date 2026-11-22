@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Single-process stand-in for the Erlang back-end, following the policies of the proposal
@@ -46,6 +49,7 @@ public class MockBackend implements BookingBackend {
     private final Map<String, Object> done = new HashMap<>();         // requestId -> Map or BackendException
     private final List<Runnable> pendingEvents = new ArrayList<>();
     private long nextId = 1;
+    private ScheduledExecutorService timers;
 
     /** A slot that is not free. Free slots have no entry. */
     private static final class Slot {
@@ -78,6 +82,39 @@ public class MockBackend implements BookingBackend {
     @Override
     public void addEventListener(EventListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * Fires expired holds, offers and check-ins every second, like the back-end's timers,
+     * so their events reach the browsers on time. Without it (unit tests) they fire on the
+     * next call.
+     */
+    public synchronized void startTimers() {
+        if (timers == null) {
+            timers = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "fairslot-mock-timers");
+                t.setDaemon(true);
+                return t;
+            });
+            timers.scheduleAtFixedRate(this::tick, 1, 1, TimeUnit.SECONDS);
+        }
+    }
+
+    private void tick() {
+        try {
+            synchronized (this) {
+                sweep(clock.millis());
+            }
+        } finally {
+            flushEvents();
+        }
+    }
+
+    @Override
+    public synchronized void close() {
+        if (timers != null) {
+            timers.shutdownNow();
+        }
     }
 
     @Override
@@ -184,6 +221,7 @@ public class MockBackend implements BookingBackend {
         s.holdId = "h-" + nextId++;
         s.holdExpires = now + HOLD_MS;
         holds.put(s.holdId, s);
+        event("slot_taken", Map.of("resource_id", resId, "slot_start", start));
         return Map.of("hold_id", s.holdId, "expires_at", s.holdExpires);
     }
 
@@ -314,6 +352,7 @@ public class MockBackend implements BookingBackend {
             s.bookingId = "b-" + nextId++;
             bookings.put(s.bookingId, s);
             ids.add(s.bookingId);
+            event("slot_taken", Map.of("resource_id", s.resourceId, "slot_start", s.start));
         }
         return Map.of("bundle_id", "x-" + nextId++, "booking_ids", ids);
     }

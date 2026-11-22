@@ -40,6 +40,13 @@
             <version>${websocket.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Since WebSocket 2.1 the annotations and Session live in the client API artifact. -->
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-client-api</artifactId>
+            <version>${websocket.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Java <-> Erlang bridge. Not on Maven Central for OTP 29: run tools/install-jinterface.sh once. -->
         <dependency>

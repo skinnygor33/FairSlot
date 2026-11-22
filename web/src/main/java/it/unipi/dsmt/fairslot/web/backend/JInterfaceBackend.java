@@ -200,6 +200,9 @@ public class JInterfaceBackend implements BookingBackend {
                     OtpErlangTuple t = (OtpErlangTuple) in;
                     String type = ((OtpErlangAtom) t.elementAt(1)).atomValue();
                     Map<String, Object> data = ErlangCodec.decodeMap((OtpErlangMap) t.elementAt(2));
+                    if (type.equals("partition_moved")) {
+                        map = null;   // failover: the next call fetches the new owner (contract §4)
+                    }
                     for (EventListener l : listeners) {
                         try {
                             l.onEvent(type, data);

@@ -10,6 +10,7 @@ import it.unipi.dsmt.fairslot.web.catalog.SqlResourceCatalog;
 import it.unipi.dsmt.fairslot.web.db.Database;
 import it.unipi.dsmt.fairslot.web.db.DemoUsers;
 import it.unipi.dsmt.fairslot.web.db.UserDao;
+import it.unipi.dsmt.fairslot.web.ws.NotificationHub;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -60,8 +61,10 @@ public class AppBootstrap implements ServletContextListener {
         ResourceCatalog catalog = new SqlResourceCatalog(db);
         Authenticator authenticator = new SqlAuthenticator(users);
         BookingBackend backend = createBackend(catalog);
+        NotificationHub hub = new NotificationHub();
+        backend.addEventListener(hub);
         event.getServletContext().setAttribute(AppContext.ATTRIBUTE,
-                new AppContext(backend, catalog, authenticator, zone));
+                new AppContext(backend, catalog, authenticator, hub, zone));
         LOG.info(() -> "FairSlot web tier started with backend " + backend.getClass().getSimpleName()
                 + " and " + catalog.all().size() + " resources");
     }
@@ -70,6 +73,7 @@ public class AppBootstrap implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent event) {
         AppContext app = AppContext.from(event.getServletContext());
         if (app != null) {
+            app.hub().close();
             app.backend().close();
         }
     }
@@ -78,7 +82,9 @@ public class AppBootstrap implements ServletContextListener {
         String kind = Config.get("FAIRSLOT_BACKEND", "mock");
         switch (kind) {
             case "mock":
-                return new MockBackend(catalog.all().stream().map(Resource::id).toList(), Clock.systemUTC());
+                MockBackend mock = new MockBackend(catalog.all().stream().map(Resource::id).toList(), Clock.systemUTC());
+                mock.startTimers();
+                return mock;
             case "jinterface":
                 return createJInterfaceBackend();
             default:
