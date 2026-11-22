@@ -16,6 +16,7 @@ bookings, with primary-backup replication and failover.
 | `web/` | Java web tier: servlets, REST API, WebSocket, UI, SQL (Maven WAR) | Roger |
 | `docs/` | Spec, [message contract](docs/message-contract.md), design decisions | shared |
 | `tools/` | JInterface installer, throwaway Erlang stub for web-tier development | shared |
+| `demo/` | The five demo scenarios as runnable scripts (PASS/FAIL) | shared |
 
 The only coupling between `web/` and `backend/` is
 [`docs/message-contract.md`](docs/message-contract.md). Change it together.
